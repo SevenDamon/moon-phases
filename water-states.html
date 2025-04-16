@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水的三态变化 - 科学游戏</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e0f7ff 0%, #ffffff 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #0078d4;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        .game-modes {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .mode-btn:hover {
+            background-color: #005a9e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .mode-btn.active {
+            background-color: #005a9e;
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+        .game-section {
+            display: none;
+        }
+        .game-section.active {
+            display: block;
+        }
+        .practice-section {
+            display: none;
+        }
+        .practice-section.active {
+            display: block;
+        }
+        .question-container {
+            margin-bottom: 20px;
+        }
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        .option-btn {
+            background-color: #e6f7ff;
+            border: 2px solid #0078d4;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+        .option-btn:hover {
+            background-color: #b3e0ff;
+        }
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        .option-btn.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .next-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+            display: none;
+        }
+        .next-btn.show {
+            display: inline-block;
+        }
+        .exploration-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .temperature-control {
+            width: 80%;
+            margin: 20px 0;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .slider {
+            flex-grow: 1;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #0078d4, #ff4500);
+            border-radius: 5px;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #0078d4;
+            cursor: pointer;
+        }
+        .temperature-display {
+            font-size: 1.5em;
+            margin: 0 15px;
+            min-width: 100px;
+            text-align: center;
+        }
+        .simulation-container {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #0078d4;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            background-color: #e6f7ff;
+        }
+        .state-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .particles-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #0078d4;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .diagram {
+            width: 80%;
+            height: 200px;
+            border: 2px solid #0078d4;
+            border-radius: 10px;
+            position: relative;
+            margin-bottom: 20px;
+            background-color: white;
+        }
+        .diagram-option {
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #e6f7ff;
+            border: 1px solid #0078d4;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .diagram-option:hover {
+            background-color: #b3e0ff;
+        }
+        .reward-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        .ice-cube {
+            width: 200px;
+            height: 200px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        .water-level {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background-color: rgba(0, 120, 212, 0.7);
+            transition: height 3s ease;
+        }
+        .score-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>水的三态变化</h1>
+            <p class="subtitle">探索水在不同温度下的状态变化</p>
+        </header>
+        
+        <div class="game-modes">
+            <button class="mode-btn active" data-mode="practice">练习模式</button>
+            <button class="mode-btn" data-mode="exploration">探索模式</button>
+        </div>
+        
+        <div class="score-display">得分: <span id="score">0</span></div>
+        
+        <div class="game-container">
+            <!-- 练习模式 -->
+            <div class="game-section active" id="practice-mode">
+                <div class="practice-tabs">
+                    <button class="mode-btn active" data-practice="temperature">A类题：温度与状态</button>
+                    <button class="mode-btn" data-practice="diagram">C类题：状态变化图</button>
+                </div>
+                
+                <!-- A类题：已知温度求物质状态 -->
+                <div class="practice-section active" id="temperature-practice">
+                    <div class="question-container">
+                        <h3 id="temperature-question">如果水的温度是 25°C，它处于什么状态？</h3>
+                        <div class="options-container" id="temperature-options">
+                            <div class="option-btn" data-state="solid">固态（冰）</div>
+                            <div class="option-btn" data-state="liquid">液态（水）</div>
+                            <div class="option-btn" data-state="gas">气态（水蒸气）</div>
+                        </div>
+                        <div class="feedback" id="temperature-feedback"></div>
+                        <button class="next-btn" id="temperature-next">下一题</button>
+                    </div>
+                </div>
+                
+                <!-- C类题：修正错误的状态变化示意图 -->
+                <div class="practice-section" id="diagram-practice">
+                    <div class="question-container">
+                        <h3 id="diagram-question">下面的状态变化示意图有错误，请选择正确的变化名称：</h3>
+                        <div class="diagram-container">
+                            <div class="diagram" id="state-diagram">
+                                <!-- 状态变化图将通过JavaScript动态生成 -->
+                            </div>
+                            <div class="options-container" id="diagram-options">
+                                <!-- 选项将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        <div class="feedback" id="diagram-feedback"></div>
+                        <button class="next-btn" id="diagram-next">下一题</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 探索模式 -->
+            <div class="game-section" id="exploration-mode">
+                <div class="exploration-container">
+                    <div class="temperature-control">
+                        <h3>调节温度滑块，观察水的状态变化</h3>
+                        <div class="slider-container">
+                            <input type="range" min="-30" max="120" value="25" class="slider" id="temperature-slider">
+                            <div class="temperature-display" id="temperature-value">25°C</div>
+                        </div>
+                    </div>
+                    
+                    <div class="simulation-container">
+                        <div class="state-info" id="state-info">液态（水）</div>
+                        <div class="particles-container" id="particles-container">
+                            <!-- 粒子将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <div class="state-description" id="state-description">
+                        <h3>液态水</h3>
+                        <p>在0°C到100°C之间，水呈现液态。液态水的分子运动较为活跃，但仍保持一定的相互作用力。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 融冰动画奖励 -->
+    <div class="reward-animation" id="reward-animation">
+        <div class="ice-cube">
+            <div class="water-level" id="water-level"></div>
+        </div>
+    </div>
+    
+    <script src="water-states.js"></script>
+</body>
+</html>
